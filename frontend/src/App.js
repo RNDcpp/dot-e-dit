@@ -95,7 +95,7 @@ class App extends Component {
 
   chColorClick(i,j,width){
     return (t)=>{
-      //if(t.state.mouse==1){
+      //if(t.state.mouse===1){
         console.log(i,j,width);
         console.log(t.state);
         let new_state=t.state;
@@ -133,7 +133,7 @@ class App extends Component {
 
   chColorOver(i,j,width){
     return (t,code="#000")=>{
-      if(t.state.mouse==1){
+      if(t.state.mouse===1){
         console.log(i,j,width);
         console.log(t.state);
         let new_state=t.state;
