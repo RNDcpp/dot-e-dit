@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 //import logo from './logo.svg';
 import './App.css';
+import Slider from './components/Slider';
 
 class App extends Component {
   constructor(props){
@@ -147,6 +148,10 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <Slider x='50' zx='50' />
+        <Slider x='50' zx='50' />
+        <Slider x='50' zx='50' />
+        <Slider x='50' zx='50' />
         <button onClick={(e)=>{this.chengeDsize(this.state.dsize+1)}}>+</button>
         <button onClick={(e)=>{this.chengeDsize(this.state.dsize-1)}}>-</button>
         <button onClick={(e)=>{this.resetColor()}}>***</button>
