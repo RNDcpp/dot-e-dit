@@ -1,6 +1,6 @@
 import React from 'react';
 export default class Slider extends React.Component {
-                 constructor(props) {
+                  constructor(props) {
                    super(props);
                    this.state = {
                      zx: this.props.zx,
@@ -11,10 +11,8 @@ export default class Slider extends React.Component {
                  }
                  handleMouseDown(t) {
                    return (event) => {
-                     console.log("mousedown");
-                     console.log(event.clientX - t.state.x);
                      let new_state = t.state;
-                     let x = 0
+                     let x = 0;
                      if (event.touches && event.touches[0]) {
                          x = event.touches[0].clientX;
                      } else if (event.originalEvent && event.originalEvent.changedTouches[0]) {
@@ -29,14 +27,13 @@ export default class Slider extends React.Component {
                  }
                  handleMouseUp(t) {
                    return (event) => {
-                     console.log("mouseup");
                      let new_state = t.state;
                      new_state["on"] = false;
                      t.setState();
+                     t.props.handler(
+                      (t.state.x - t.state.zx)/t.props.width+0.5
+                     );
                    };
-                   //this.props.handler(
-                   //  this.state.x - this.state.zx
-                   //);
                  }
                  handleMouseMove(t) {
                    return event => {
@@ -62,31 +59,39 @@ export default class Slider extends React.Component {
                          x = event.clientX;
                        }
                        x = x - this.state.rx;
-                       console.log(x);
+                       if (x < 0) {
+                         x = 0
+                       }
+                       if (x > this.props.width) {
+                         x=this.props.width;
+                       }
                        let new_state = this.state;
                        new_state["x"] = x;
                        this.setState(new_state);
+                       t.props.handler(
+                        (t.state.x - t.state.zx)/t.props.width+0.5
+                       );
                      }
                    };
                  }
                  render() {
                    return (
                      <div class="slider">
-                       <svg width="150" height="50">
+                       <svg width={this.props.width+50+"px"} height="50">
                          <rect
-                           x="0px"
+                           x="25px"
                            y="22px"
-                           width="150px"
+                           width={this.props.width+"px"}
                            height="5px"
                            fill="#eee"
                            stroke="#ccc"
                            strokeWidth="1px"
                          />
                          <circle
-                           cx={this.state.x}
+                           cx={this.state.x+25}
                            cy="25"
                            r="10"
-                           fill="#ccc"
+                           fill={this.props.pinColor}
                            stroke="#eee"
                            stroke-width="1"
                            onMouseDown={this.handleMouseDown(
