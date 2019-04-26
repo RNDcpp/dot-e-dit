@@ -15,7 +15,10 @@ class App extends Component {
       mouse: 0,
       currentRGB: [0, 0, 0],
       currentAlpha: 1.0,
-      colors: []
+      colors: [],
+      layers: [],
+      max_layer_id: 0,
+      current_layer_id: 0,
     };
     this.CRref = React.createRef();
     this.CGref = React.createRef();
@@ -76,6 +79,10 @@ class App extends Component {
   resetColor() {
     let new_state = this.state;
     new_state.colors = [];
+    let layer = {
+      id: new_state.max_layer_id,
+      colors: [],
+    };
     let i, j;
     for (i = 0; i < this.state.wlen; i++) {
       for (j = 0; j < this.state.hlen; j++) {
@@ -84,8 +91,37 @@ class App extends Component {
           j: j,
           code: "#ffffff"
         });
+        layer.colors.push({
+          i: i,
+          j: j,
+          code: "#ffffff",
+          alpha: 0,
+        });
       }
     }
+    new_state.layers.push(layer);
+    this.setState(new_state);
+  }
+
+  addLayer(){
+    let new_state=this.state;
+    new_state.max_layer_id=new_state.max_layer_id + 1;
+    let new_layer={
+      id: new_state.max_layer_id,
+      colors: [],
+    };
+    let i, j;
+    for (i = 0; i < this.state.wlen; i++) {
+      for (j = 0; j < this.state.hlen; j++) {
+        new_layer.colors.push({
+          i: i,
+          j: j,
+          code: "#ffffff",
+          alpha: 0
+        });
+      }
+    }
+    new_state.layers.push(new_layer);
     this.setState(new_state);
   }
 
