@@ -76,7 +76,7 @@ export default class Slider extends React.Component {
                  }
                  render() {
                    return (
-                     <div class="slider">
+                     <div className="slider">
                        <svg width={this.props.width+50+"px"} height="50">
                          <rect
                            x="25px"
@@ -93,7 +93,7 @@ export default class Slider extends React.Component {
                            r="10"
                            fill={this.props.pinColor}
                            stroke="#eee"
-                           stroke-width="1"
+                           strokeWidth="1"
                            onMouseDown={this.handleMouseDown(
                              this
                            )}

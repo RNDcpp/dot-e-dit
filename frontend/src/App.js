@@ -18,7 +18,7 @@ class App extends Component {
       colors: [],
       layers: [],
       max_layer_id: 0,
-      current_layer_id: 0,
+      current_layer_id: 0
     };
     this.CRref = React.createRef();
     this.CGref = React.createRef();
@@ -61,18 +61,11 @@ class App extends Component {
   }
 
   componentDidMount() {
-    let new_state = this.state;
-    let i, j;
-    for (i = 0; i < this.state.wlen; i++) {
-      for (j = 0; j < this.state.hlen; j++) {
-        new_state.colors.push({
-          i: i,
-          j: j,
-          //code: this.rgb2hex([0,0,0].map((e)=>{return Math.random()* Math.floor(256)}))
-          code: "#ffffff"
-        });
-      }
-    }
+    let new_state = this.addLayer(this.state);
+    this.resetColor()
+    this.fillSingleColor(new_state.layers[0]);
+    this.applyColor(new_state);
+    new_state.current_layer_id = 1;
     this.setState(new_state);
   }
 
@@ -81,7 +74,7 @@ class App extends Component {
     new_state.colors = [];
     let layer = {
       id: new_state.max_layer_id,
-      colors: [],
+      colors: []
     };
     let i, j;
     for (i = 0; i < this.state.wlen; i++) {
@@ -89,26 +82,48 @@ class App extends Component {
         new_state.colors.push({
           i: i,
           j: j,
-          code: "#ffffff"
+          code: "#ffffff",
+          rgb: [255, 255, 255]
         });
         layer.colors.push({
           i: i,
           j: j,
-          code: "#ffffff",
-          alpha: 0,
+          rgb: [255, 255, 255],
+          alpha: 0
         });
       }
     }
-    new_state.layers.push(layer);
+    this.fillSingleColor(layer);
+    new_state.layers=[layer];
+    this.addLayer(new_state);
     this.setState(new_state);
   }
 
-  addLayer(){
-    let new_state=this.state;
-    new_state.max_layer_id=new_state.max_layer_id + 1;
-    let new_layer={
-      id: new_state.max_layer_id,
-      colors: [],
+  applyColor(state) {
+    let colors = state.colors;
+    colors.forEach((ee, ii) => {
+      state.layers.forEach(e => {
+        ee.rgb[0] = e.colors[ii].rgb[0] * e.colors[ii].alpha + ee.rgb[0] * (1 - e.colors[ii].alpha);
+        ee.rgb[1] = e.colors[ii].rgb[1] * e.colors[ii].alpha + ee.rgb[1] * (1 - e.colors[ii].alpha);
+        ee.rgb[2] = e.colors[ii].rgb[2] * e.colors[ii].alpha + ee.rgb[2] * (1 - e.colors[ii].alpha);
+      });
+      ee.code = this.rgb2hex(ee.rgb);
+    });
+    return state;
+  }
+  applyColorCell(ee, ii) {
+    this.state.layers.forEach(e => {
+      ee.rgb[0] = e.colors[ii].rgb[0] * e.colors[ii].alpha + ee.rgb[0] * (1 - e.colors[ii].alpha);
+      ee.rgb[1] = e.colors[ii].rgb[1] * e.colors[ii].alpha + ee.rgb[1] * (1 - e.colors[ii].alpha);
+      ee.rgb[2] = e.colors[ii].rgb[2] * e.colors[ii].alpha + ee.rgb[2] * (1 - e.colors[ii].alpha);
+    });
+    ee.code = this.rgb2hex(ee.rgb);
+  }
+
+  addLayer(state) {
+    let new_layer = {
+      id: state.max_layer_id,
+      colors: []
     };
     let i, j;
     for (i = 0; i < this.state.wlen; i++) {
@@ -116,18 +131,28 @@ class App extends Component {
         new_layer.colors.push({
           i: i,
           j: j,
-          code: "#ffffff",
+          rgb: [255, 255, 255],
           alpha: 0
         });
       }
     }
-    new_state.layers.push(new_layer);
-    this.setState(new_state);
+    state.layers.push(new_layer);
+    state.max_layer_id = state.max_layer_id + 1;
+    return state;
+  }
+
+  fillSingleColor(layer, rgb = [255, 255, 255], alpha = 1) {
+    layer.colors.forEach(e => {
+      e.rgb=rgb;
+      e.alpha = alpha;
+    });
   }
 
   chengeDsize(_dsize) {
     let new_state = this.state;
+    console.log(new_state.dsize);
     new_state.dsize = _dsize;
+    console.log(this.state.dsize);
     this.setState(new_state);
   }
 
@@ -139,18 +164,17 @@ class App extends Component {
 
   chColorClick(i, j, width) {
     return t => {
-      //if(t.state.mouse===1){
-      console.log(i, j, width);
       console.log(t.state);
       let new_state = t.state;
-      let new_code = this.rgba2hex(
-        new_state.currentRGB,
-        new_state.currentAlpha,
-        new_state.colors[i * width + j].code
-      );
-      new_state.colors[i * width + j] = { i: i, j: j, code: new_code };
+      let target_cell =
+        new_state.layers[new_state.current_layer_id].colors[i * width + j];
+      new_state.currentRGB.forEach((e, ind) => {
+        target_cell.rgb[ind] =
+          e * new_state.currentAlpha +
+          target_cell.rgb[ind] * (1 - new_state.currentAlpha);
+      });
+      t.applyColorCell(new_state.colors[i + width + j], i * width + j);
       t.setState(new_state);
-      //}
     };
   }
 
@@ -181,15 +205,16 @@ class App extends Component {
   chColorOver(i, j, width) {
     return (t, code = "#000") => {
       if (t.state.mouse === 1) {
-        console.log(i, j, width);
         console.log(t.state);
         let new_state = t.state;
-        let new_code = this.rgba2hex(
-          new_state.currentRGB,
-          new_state.currentAlpha,
-          new_state.colors[i * width + j].code
-        );
-        new_state.colors[i * width + j] = { i: i, j: j, code: new_code };
+        let target_cell =
+          new_state.layers[new_state.current_layer_id].colors[i * width + j];
+        new_state.currentRGB.forEach((e, ind) => {
+          target_cell.rgb[ind] =
+            e * new_state.currentAlpha +
+            target_cell.rgb[ind] * (1 - new_state.currentAlpha);
+        });
+        t.applyColorCell(new_state.colors[i + width + j], i * width + j);
         t.setState(new_state);
       }
     };
@@ -297,7 +322,7 @@ class App extends Component {
           >
             ***
           </button>
-          
+
           <div
             className="editor"
             onMouseDown={e => {
