@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 //import logo from './logo.svg';
 import './App.css';
 import Slider from './components/Slider';
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -72,6 +71,7 @@ class App extends Component {
     new_state.max_layer_id=0;
     let layer = {
       id: new_state.max_layer_id,
+      active: true,
       colors: []
     };
     new_state.max_layer_id+=1;
@@ -102,9 +102,17 @@ class App extends Component {
     let colors = state.colors;
     colors.forEach((ee, ii) => {
       state.layers.forEach(e => {
-        ee.rgb[0] = e.colors[ii].rgb[0] * e.colors[ii].alpha + ee.rgb[0] * (1 - e.colors[ii].alpha);
-        ee.rgb[1] = e.colors[ii].rgb[1] * e.colors[ii].alpha + ee.rgb[1] * (1 - e.colors[ii].alpha);
-        ee.rgb[2] = e.colors[ii].rgb[2] * e.colors[ii].alpha + ee.rgb[2] * (1 - e.colors[ii].alpha);
+        if (e.active) {
+          ee.rgb[0] =
+            e.colors[ii].rgb[0] * e.colors[ii].alpha +
+            ee.rgb[0] * (1 - e.colors[ii].alpha);
+          ee.rgb[1] =
+            e.colors[ii].rgb[1] * e.colors[ii].alpha +
+            ee.rgb[1] * (1 - e.colors[ii].alpha);
+          ee.rgb[2] =
+            e.colors[ii].rgb[2] * e.colors[ii].alpha +
+            ee.rgb[2] * (1 - e.colors[ii].alpha);
+        }
       });
       ee.code = this.rgb2hex(ee.rgb);
     });
@@ -112,9 +120,17 @@ class App extends Component {
   }
   applyColorCell(ee, ii, state) {
     state.layers.forEach(e => {
-      ee.rgb[0] = e.colors[ii].rgb[0] * e.colors[ii].alpha + ee.rgb[0] * (1 - e.colors[ii].alpha);
-      ee.rgb[1] = e.colors[ii].rgb[1] * e.colors[ii].alpha + ee.rgb[1] * (1 - e.colors[ii].alpha);
-      ee.rgb[2] = e.colors[ii].rgb[2] * e.colors[ii].alpha + ee.rgb[2] * (1 - e.colors[ii].alpha);
+      if (e.active) {
+        ee.rgb[0] =
+          e.colors[ii].rgb[0] * e.colors[ii].alpha +
+          ee.rgb[0] * (1 - e.colors[ii].alpha);
+        ee.rgb[1] =
+          e.colors[ii].rgb[1] * e.colors[ii].alpha +
+          ee.rgb[1] * (1 - e.colors[ii].alpha);
+        ee.rgb[2] =
+          e.colors[ii].rgb[2] * e.colors[ii].alpha +
+          ee.rgb[2] * (1 - e.colors[ii].alpha);
+      }
     });
     ee.code = this.rgb2hex(ee.rgb);
   }
@@ -122,6 +138,7 @@ class App extends Component {
   addLayer(state) {
     let new_layer = {
       id: state.max_layer_id,
+      active: true,
       colors: []
     };
     let i, j;
@@ -138,6 +155,12 @@ class App extends Component {
     state.layers.push(new_layer);
     state.max_layer_id = state.max_layer_id + 1;
     return state;
+  }
+
+  chLayerActivation(layer_row,activation){
+    let new_state=this.state;
+    new_state.layers[layer_row].active=activation;
+    this.setState(new_state);
   }
 
   fillSingleColor(layer, rgb = [255, 255, 255], alpha = 1) {
@@ -245,6 +268,17 @@ class App extends Component {
   applyAlpha(val) {
     let new_state = this.state;
     new_state.currentAlpha = val;
+    this.setState(new_state);
+  }
+
+  handleLayerAdd(){
+    let new_state=this.addLayer(this.state);
+    this.setState(new_state);
+  }
+
+  chCurrentLayerID(id){
+    let new_state=this.state;
+    new_state.current_layer_id=id;
     this.setState(new_state);
   }
 
@@ -377,6 +411,24 @@ class App extends Component {
             </svg>
           </div>
         </div>
+        <div class="LayerPanel">
+        Current:{this.state.current_layer_id}
+          <button onClick={this.handleLayerAdd.bind(this)}>++</button>
+          {this.state.layers.map((element,i) => {
+            return (
+              <div className={(i===this.state.current_layer_id)?"currentLayer":"normalLayer"} onClick={()=>{this.chCurrentLayerID(i);}}>
+                id: {element.id},active: {(element.active)?"A":"N"}
+                { (() => {
+                  if(element.active){
+                    return <button onClick={()=>{this.chLayerActivation(i,false);this.applyColor(this.state);this.setState(this.state)}}>-</button>
+                  } else {
+                    return <button onClick={()=>{this.chLayerActivation(i,true);this.applyColor(this.state);this.setState(this.state)}}>*</button> 
+                  }
+                })()}
+              </div>
+            );
+          }).reverse()}
+          </div>
       </div>
     );
   }

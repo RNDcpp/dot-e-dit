@@ -4,5 +4,19 @@
 }
 .MainPanel{
   display: inline-block;
-  width: 600px;
+  width: 700px;
+}
+.LayerPanel{
+  display: inline-block;
+  width: 200px;
+}
+.currentLayer{
+  border: solid;
+  border-color: #333333;
+  border-width: 2px;
+}
+.normalLayer{
+  border: solid;
+  border-color: #e0e0e0;
+  border-width: 1px;
 }
