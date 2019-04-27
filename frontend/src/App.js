@@ -37,16 +37,13 @@ class App extends Component {
   }
 
   hex2rgb(hex) {
-    console.log(hex);
     return [0, 1, 2].map(e => {
       return parseInt(hex.substr(e * 2 + 1, 2), 16);
     });
   }
 
   rgba2hex(rgb, alpha, base_hex) {
-    console.log(base_hex);
     const base_int = this.hex2rgb(base_hex);
-    console.log(base_int);
     return (
       "#" +
       rgb
@@ -72,10 +69,12 @@ class App extends Component {
   resetColor() {
     let new_state = this.state;
     new_state.colors = [];
+    new_state.max_layer_id=0;
     let layer = {
       id: new_state.max_layer_id,
       colors: []
     };
+    new_state.max_layer_id+=1;
     let i, j;
     for (i = 0; i < this.state.wlen; i++) {
       for (j = 0; j < this.state.hlen; j++) {
@@ -111,8 +110,8 @@ class App extends Component {
     });
     return state;
   }
-  applyColorCell(ee, ii) {
-    this.state.layers.forEach(e => {
+  applyColorCell(ee, ii, state) {
+    state.layers.forEach(e => {
       ee.rgb[0] = e.colors[ii].rgb[0] * e.colors[ii].alpha + ee.rgb[0] * (1 - e.colors[ii].alpha);
       ee.rgb[1] = e.colors[ii].rgb[1] * e.colors[ii].alpha + ee.rgb[1] * (1 - e.colors[ii].alpha);
       ee.rgb[2] = e.colors[ii].rgb[2] * e.colors[ii].alpha + ee.rgb[2] * (1 - e.colors[ii].alpha);
@@ -150,9 +149,7 @@ class App extends Component {
 
   chengeDsize(_dsize) {
     let new_state = this.state;
-    console.log(new_state.dsize);
     new_state.dsize = _dsize;
-    console.log(this.state.dsize);
     this.setState(new_state);
   }
 
@@ -164,7 +161,6 @@ class App extends Component {
 
   chColorClick(i, j, width) {
     return t => {
-      console.log(t.state);
       let new_state = t.state;
       let target_cell =
         new_state.layers[new_state.current_layer_id].colors[i * width + j];
@@ -173,7 +169,9 @@ class App extends Component {
           e * new_state.currentAlpha +
           target_cell.rgb[ind] * (1 - new_state.currentAlpha);
       });
-      t.applyColorCell(new_state.colors[i + width + j], i * width + j);
+      target_cell.alpha = Math.min(new_state.currentAlpha+target_cell.alpha,1);
+
+      t.applyColorCell(new_state.colors[i * width + j], i * width + j, new_state);
       t.setState(new_state);
     };
   }
@@ -205,16 +203,22 @@ class App extends Component {
   chColorOver(i, j, width) {
     return (t, code = "#000") => {
       if (t.state.mouse === 1) {
-        console.log(t.state);
         let new_state = t.state;
         let target_cell =
-          new_state.layers[new_state.current_layer_id].colors[i * width + j];
+          new_state.layers[new_state.current_layer_id].colors[
+            i * width + j
+          ];
         new_state.currentRGB.forEach((e, ind) => {
           target_cell.rgb[ind] =
             e * new_state.currentAlpha +
             target_cell.rgb[ind] * (1 - new_state.currentAlpha);
         });
-        t.applyColorCell(new_state.colors[i + width + j], i * width + j);
+        target_cell.alpha = Math.min(new_state.currentAlpha + target_cell.alpha, 1);
+        t.applyColorCell(
+          new_state.colors[i * width + j],
+          i * width + j,
+          new_state
+        );
         t.setState(new_state);
       }
     };
