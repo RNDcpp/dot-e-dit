@@ -12,7 +12,8 @@ class App extends Component {
       wlen: 32,
       hlen: 32,
       mouse: 0,
-      currentRGB: [0, 0, 0],
+      currentRGB: [[0, 0, 0],[255,255,255]],
+      currentColor: 0,
       currentAlpha: 1.0,
       colors: [],
       layers: [],
@@ -23,6 +24,16 @@ class App extends Component {
     this.CGref = React.createRef();
     this.CBref = React.createRef();
     this.CAref = React.createRef();
+  }
+  _currentRGB(state){
+    return state.currentRGB[state.currentColor];
+  }
+  _subRGB(state){
+    if(state.currentColor===0) {
+      return state.currentRGB[1];
+    } else {
+      return state.currentRGB[0];
+    }
   }
   rgb2hex(rgb) {
     return (
@@ -187,7 +198,7 @@ class App extends Component {
       let new_state = t.state;
       let target_cell =
         new_state.layers[new_state.current_layer_id].colors[i * width + j];
-      new_state.currentRGB.forEach((e, ind) => {
+      t._currentRGB(new_state).forEach((e, ind) => {
         target_cell.rgb[ind] =
           e * new_state.currentAlpha +
           target_cell.rgb[ind] * (1 - new_state.currentAlpha);
@@ -201,19 +212,19 @@ class App extends Component {
 
   changeR(e) {
     let new_state = this.state;
-    new_state.currentRGB[0] = parseInt(this.CRref.current.value);
+    this._currentRGB(new_state)[0] = parseInt(this.CRref.current.value);
     this.setState(new_state);
   }
 
   changeG(e) {
     let new_state = this.state;
-    new_state.currentRGB[1] = parseInt(this.CGref.current.value);
+    this._currentRGB(new_state)[1] = parseInt(this.CGref.current.value);
     this.setState(new_state);
   }
 
   changeB(e) {
     let new_state = this.state;
-    new_state.currentRGB[2] = parseInt(this.CBref.current.value);
+    this._currentRGB(new_state)[2] = parseInt(this.CBref.current.value);
     this.setState(new_state);
   }
 
@@ -231,7 +242,7 @@ class App extends Component {
           new_state.layers[new_state.current_layer_id].colors[
             i * width + j
           ];
-        new_state.currentRGB.forEach((e, ind) => {
+          t._currentRGB(new_state).forEach((e, ind) => {
           target_cell.rgb[ind] =
             e * new_state.currentAlpha +
             target_cell.rgb[ind] * (1 - new_state.currentAlpha);
@@ -250,19 +261,19 @@ class App extends Component {
   applyR(val) {
     let new_state = this.state;
     let col = Math.floor(val * 255);
-    new_state.currentRGB[0] = col;
+    this._currentRGB(new_state)[0] = col;
     this.setState(new_state);
   }
   applyG(val) {
     let new_state = this.state;
     let col = Math.floor(val * 255);
-    new_state.currentRGB[1] = col;
+    this._currentRGB(new_state)[1] = col;
     this.setState(new_state);
   }
   applyB(val) {
     let new_state = this.state;
     let col = Math.floor(val * 255);
-    new_state.currentRGB[2] = col;
+    this._currentRGB(new_state)[2] = col;
     this.setState(new_state);
   }
   applyAlpha(val) {
@@ -282,18 +293,32 @@ class App extends Component {
     this.setState(new_state);
   }
 
+  switchColor(){
+    let new_state = this.state;
+    new_state.currentColor = (new_state.currentColor===0)?1:0;
+    this.setState(new_state);
+  }
+
   render() {
     return (
       <div className="App">
         <div className="Sliders">
           <div>
-            <svg id="current-color" width="100px" height="100px">
+            <svg id="current-color" width="150px" height="150px">
               <rect
                 x="0px"
                 y="0px"
                 width="100px"
                 height="100px"
-                fill={this.rgb2hex(this.state.currentRGB)}
+                fill={this.rgb2hex(this._currentRGB(this.state))}
+              />
+              <rect
+                x="100px"
+                y="50px"
+                width="50px"
+                height="50px"
+                fill={this.rgb2hex(this._subRGB(this.state))}
+                onClick={this.switchColor.bind(this)}
               />
             </svg>
           </div>
