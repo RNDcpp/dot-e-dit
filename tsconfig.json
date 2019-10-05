@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "allowJs": true,
+    "outDir": "./build/js",
+    "target": "es5",
+    "moduleResolution": "node",
+    "module": "esnext",
+    "lib": [
+      "es2015",
+      "es2016",
+      "dom",
+      "esnext"
+    ],
+    "jsx": "react",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": [
+    "./frontend/src/**.tsx",
+    "./frontend/src/**.ts",
+  ],
+  "exclude": [
+    "./node_modules"
+  ]
+}
